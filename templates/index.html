@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Educational Search</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Search Educational Content</h1>
+        <form id="search-form">
+            <input type="text" id="search-query" placeholder="Enter topic...">
+            <button type="submit">Search</button>
+        </form>
+        <div id="results"></div>
+    </div>
+    <script>
+        document.getElementById('search-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const query = document.getElementById('search-query').value;
+            fetch(`/search?query=${query}`)
+                .then(response => response.json())
+                .then(data => {
+                    const resultsDiv = document.getElementById('results');
+                    resultsDiv.innerHTML = data.map(result => `
+                        <div class="result">
+                            <a href="${result.link}" target="_blank">${result.title}</a>
+                            <p>${result.description}</p>
+                        </div>`).join('');
+                });
+        });
+    </script>
+</body>
+</html>
