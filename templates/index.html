@@ -2,34 +2,77 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Educational Search</title>
+    <title>Articles and Videos</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script>
+        function searchContent(event) {
+            event.preventDefault();
+            const query = document.querySelector('input[name="query"]').value;
+            const source = document.querySelector('input[name="source"]:checked').value;
+            
+            fetch('/search', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: `query=${query}&source=${source}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                const contentList = document.getElementById('content-list');
+                contentList.innerHTML = '';
+                data.forEach(item => {
+                    const li = document.createElement('li');
+                    const title = document.createElement('h2');
+                    if (item.url) {
+                        const link = document.createElement('a');
+                        link.href = item.url;
+                        link.target = '_blank';
+                        link.textContent = item.title;
+                        title.appendChild(link);
+                    } else {
+                        title.textContent = item.title;
+                    }
+                    const description = document.createElement('p');
+                    description.textContent = item.description;
+                    li.appendChild(title);
+                    li.appendChild(description);
+                    contentList.appendChild(li);
+                });
+            });
+        }
+    </script>
 </head>
 <body>
     <div class="container">
-        <h1>Search Educational Content</h1>
-        <form id="search-form">
-            <input type="text" id="search-query" placeholder="Enter topic...">
+        <h1>Articles and Videos</h1>
+        <form onsubmit="searchContent(event)">
+            <input type="text" name="query" placeholder="Search for articles or videos...">
+            <div class="radio-group">
+                <label>
+                    <input type="radio" name="source" value="medium" checked>
+                    Medium
+                </label>
+                <label>
+                    <input type="radio" name="source" value="youtube">
+                    YouTube
+                </label>
+                <label>
+                    <input type="radio" name="source" value="researchgate">
+                    ResearchGate
+                </label>
+                <label>
+                    <input type="radio" name="source" value="sciencedirect">
+                    ScienceDirect
+                </label>
+                <label>
+                    <input type="radio" name="source" value="sciencedirect">
+                    ScienceDirect
+                </label>
+            </div>
             <button type="submit">Search</button>
         </form>
-        <div id="results"></div>
+        <ul id="content-list"></ul>
     </div>
-    <script>
-        document.getElementById('search-form').addEventListener('submit', function(event) {
-            event.preventDefault();
-            const query = document.getElementById('search-query').value;
-            fetch(`/search?query=${query}`)
-                .then(response => response.json())
-                .then(data => {
-                    const resultsDiv = document.getElementById('results');
-                    resultsDiv.innerHTML = data.map(result => `
-                        <div class="result">
-                            <a href="${result.link}" target="_blank">${result.title}</a>
-                            <p>${result.description}</p>
-                        </div>`).join('');
-                });
-        });
-    </script>
 </body>
 </html>
